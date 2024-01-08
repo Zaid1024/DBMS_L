@@ -145,21 +145,21 @@ JOIN COURSE C ON E.course_no = C.course_no;
 
 DELIMITER //
 
-CREATE TRIGGER PreventEnroll
+CREATE TRIGGER prevent_enrollment
 BEFORE INSERT ON ENROLL
 FOR EACH ROW
 BEGIN
-    DECLARE prereq_marks INT;
+    DECLARE prerequisite_marks INT;
 
-    -- Replace 'PrereqTable' with the actual name of your prerequisite table
-    SELECT prereq_marks
-    INTO prereq_marks
-    FROM PrereqTable
+    -- Get the prerequisite marks for the course
+    SELECT marks INTO prerequisite_marks
+    FROM COURSE
     WHERE course_no = NEW.course_no;
 
-    IF NEW.marks < prereq_marks THEN
+    -- Check if the student's marks meet the prerequisite
+    IF NEW.marks < 40 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Cannot enroll, marks prerequisite not met';
+        SET MESSAGE_TEXT = 'Cannot enroll: Marks prerequisite not met';
     END IF;
 END;
 
